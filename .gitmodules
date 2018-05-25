@@ -1,0 +1,6 @@
+[submodule "docker-frontail"]
+	path = docker-frontail
+	url = https://github.com/QNimbus/docker-frontail
+[submodule "docker-openhab"]
+	path = docker-openhab
+	url = https://github.com/QNimbus/docker-openhab
