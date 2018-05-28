@@ -7,18 +7,14 @@ networks:
       com.docker.network.bridge.enable_icc: 'true'
       com.docker.network.bridge.enable_ip_masquerade: 'true'
       com.docker.network.bridge.host_binding_ipv4: '127.0.0.1'
-      #com.docker.network.bridge.name: 'docker1'
       com.docker.network.driver.mtu: '1500'
     ipam:
       driver: default
-      # config:
-      # - subnet: 172.21.0.0/16      
 
 services:
   openhab-service:
     container_name: openhab
-    image: qnimbus/docker-openhab:2.3.0-snapshot-amd64-debian
-    build: ./docker-openhab/2.3.0-snapshot/amd64/debian/
+    image: qnimbus/docker-openhab:latest
     volumes:
       - ./volumes/conf:/openhab/conf
       - ./volumes/addons:/openhab/addons
@@ -30,6 +26,7 @@ services:
       - 18443:8443
       - 18101:1801
       - 15007:5007
+    hostname: openhab
     restart: unless-stopped
     stdin_open: true
     tty: true
@@ -39,12 +36,14 @@ services:
       - openhab-service
     container_name: frontail
     image: qnimbus/docker-frontail:latest
-    build: ./docker-frontail/
-    command: --ui-highlight --ui-highlight-preset /frontail-preset.json /log/openhab.log /log/events.log
     volumes:
       - ./volumes/userdata/logs:/log:ro
     networks:
       - openhabnet
     ports:
       - 29001:9001
+    hostname: frontail
     restart: on-failure
+
+    entrypoint: ["/wait-for.sh", "openhab:8080", "--timeout=1", "--", "frontail" ]
+    command: --ui-highlight --ui-highlight-preset /frontail-preset.json /log/openhab.log /log/events.log
